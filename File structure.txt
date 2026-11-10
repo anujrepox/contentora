@@ -1,0 +1,23 @@
+hooklab-project/
+│
+├── frontend/                  👤 MEMBER 1 OWNS THIS ENTIRE FOLDER
+│   ├── index.html             (The Landing Page code I gave you)
+│   ├── dashboard.html         (The new clean UI where the 5 tools live)
+│   ├── css/
+│   │   ├── style.css          (All your colors, buttons, grid, and fonts)
+│   │   └── dashboard.css      (Styles specific to the tool forms)
+│   ├── js/
+│   │   ├── landing.js         (Makes the landing page buttons work)
+│   │   └── dashboard.js       (Catches the "Generate" button click and sends it to backend)
+│   └── assets/                (Put your images and logos here)
+│
+├── backend/                   👤 MEMBER 2 OWNS THIS ENTIRE FOLDER
+│   ├── server.js              (Starts the server on port 5000)
+│   ├── package.json           (List of backend tools to install)
+│   ├── .env                   (🔒 SECRET FILE: Holds your DeepSeek API Key)
+│   └── routes/
+│       └── api.js             (Receives the request from Member 1's frontend)
+│
+└── ai-service/                👤 MEMBER 3 OWNS THIS ENTIRE FOLDER
+    ├── deepseek.js            (The code that actually connects to DeepSeek)
+    └── prompts.js             (The hidden instructions for the AI, e.g., "Act as a YouTuber...")

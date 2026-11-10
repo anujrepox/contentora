@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Contentora</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #050505; 
+            --pink: #FF007F; 
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+            --bg-panel: rgba(20, 20, 20, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            font-family: var(--font-body);
+            display: flex;
+        }
+
+        /* Subtle Background Grid */
+        .bg-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
+            background-image: 
+                linear-gradient(to right, rgba(255, 100, 180, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 100, 180, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px; 
+        }
+
+        /* =========================================
+           SIDEBAR
+           ========================================= */
+        .sidebar {
+            width: 280px;
+            height: 100%;
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; margin-bottom: 40px; cursor: pointer;}
+        .logo i { color: var(--pink); font-size: 20px; }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; border-radius: 10px;
+            color: var(--text-muted); font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: 0.3s;
+            border: none; background: transparent; width: 100%; text-align: left;
+            font-family: var(--font-body);
+        }
+        .nav-item i { font-size: 16px; width: 20px; text-align: center;}
+        
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(255, 0, 127, 0.1); color: var(--pink); border-left: 3px solid var(--pink); }
+
+        .nav-item.back-home { margin-top: auto; color: #fff; border: 1px solid var(--border-color); justify-content: center; }
+        .nav-item.back-home:hover { background: rgba(255,255,255,0.1); }
+
+        /* =========================================
+           MAIN CONTENT AREA
+           ========================================= */
+        .main-area {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px;
+            position: relative;
+        }
+
+        .tool-header { margin-bottom: 30px; }
+        .tool-header h2 { font-size: 32px; margin-bottom: 8px; font-weight: 600;}
+        .tool-header p { color: var(--text-muted); font-size: 15px; }
+
+        .workspace {
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            max-width: 900px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
+        
+        input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            font-family: var(--font-body);
+        }
+        input[type="text"]:focus { border-color: var(--pink); box-shadow: 0 0 15px rgba(255,0,127,0.2); }
+
+        .btn-generate {
+            background: linear-gradient(90deg, #FF007F, #FF4DA6);
+            color: white; border: none; padding: 16px 24px;
+            border-radius: 10px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: 0.3s; align-self: flex-start;
+            display: flex; align-items: center; gap: 10px;
+            font-family: var(--font-body);
+        }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(255,0,127,0.4); }
+        .btn-generate:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .output-box {
+            margin-top: 30px;
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Keeps line breaks from the AI */
+        }
+
+        /* Hide tools by default */
+        .tool-view { display: none; }
+        .tool-view.active { display: flex; flex-direction: column; flex: 1; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo"><i class="fa-solid fa-star-of-life"></i> Contentora</div>
+        
+        <div class="nav-menu">
+            <!-- The onclick triggers the switchTool() function -->
+            <button class="nav-item active" onclick="switchTool('idea', this)"><i class="fa-regular fa-lightbulb"></i> Idea Generator</button>
+            <button class="nav-item" onclick="switchTool('script', this)"><i class="fa-regular fa-pen-to-square"></i> Script Writer</button>
+            <button class="nav-item" onclick="switchTool('trends', this)"><i class="fa-solid fa-arrow-trend-up"></i> Trending Topics</button>
+            <button class="nav-item" onclick="switchTool('captions', this)"><i class="fa-solid fa-hashtag"></i> Captions & Hashtags</button>
+            <button class="nav-item" onclick="switchTool('planner', this)"><i class="fa-regular fa-calendar-days"></i> Content Planner</button>
+        </div>
+
+        <a href="index.html" class="nav-item back-home"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+        
+        <!-- TOOL 1: IDEA GENERATOR -->
+        <div id="idea" class="tool-view active">
+            <div class="tool-header">
+                <h2>AI Idea Generator</h2>
+                <p>Enter a topic below, and let the AI generate viral video ideas for you.</p>
+            </div>
+            <div class="workspace">
+                <div class="input-group">
+                    <label>What is your video about?</label>
+                    <input type="text" id="input-idea" placeholder="e.g., 5 minute morning routine for developers...">
+                </div>
+                <button class="btn-generate" onclick="generate('idea', this)">
+                    Generate Ideas <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </button>
+                <div class="output-box" id="output-idea">Your generated ideas will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TOOL 2: SCRIPT WRITER -->
+        <div id="script" class="tool-view">
+            <div class="tool-header">
+                <h2>AI Script Writer</h2>
+                <p>Enter your video topic, and the AI will write a 60-second script.</p>
+            </div>
+            <div class="workspace">
+                <div class="input-group">
+                    <label>What is the script about?</label>
+                    <input type="text" id="input-script" placeholder="e.g., Why the new iPhone is actually bad...">
+                </div>
+                <button class="btn-generate" onclick="generate('script', this)">
+                    Write Script <i class="fa-solid fa-pen-nib"></i>
+                </button>
+                <div class="output-box" id="output-script">Your script will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TOOL 3: TRENDING TOPICS -->
+        <div id="trends" class="tool-view">
+            <div class="tool-header">
+                <h2>Trending Topics</h2>
+                <p>Discover what is currently going viral in your niche.</p>
+            </div>
+            <div class="workspace">
+                <div class="input-group">
+                    <label>Enter your niche:</label>
+                    <input type="text" id="input-trends" placeholder="e.g., Tech, Fitness, Gaming...">
+                </div>
+                <button class="btn-generate" onclick="generate('trends', this)">
+                    Find Trends <i class="fa-solid fa-fire"></i>
+                </button>
+                <div class="output-box" id="output-trends">Trending topics will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TOOL 4: CAPTIONS -->
+        <div id="captions" class="tool-view">
+            <div class="tool-header">
+                <h2>Captions & Hashtags</h2>
+                <p>Paste your video description, and the AI will generate captions.</p>
+            </div>
+            <div class="workspace">
+                <div class="input-group">
+                    <label>Describe your video:</label>
+                    <input type="text" id="input-captions" placeholder="e.g., A vlog of me traveling to Japan...">
+                </div>
+                <button class="btn-generate" onclick="generate('captions', this)">
+                    Generate Captions <i class="fa-solid fa-hashtag"></i>
+                </button>
+                <div class="output-box" id="output-captions">Captions will appear here...</div>
+            </div>
+        </div>
+
+        <!-- TOOL 5: PLANNER -->
+        <div id="planner" class="tool-view">
+            <div class="tool-header">
+                <h2>Content Planner</h2>
+                <p>Tell the AI your goals, and it will create a weekly schedule.</p>
+            </div>
+            <div class="workspace">
+                <div class="input-group">
+                    <label>What is your goal?</label>
+                    <input type="text" id="input-planner" placeholder="e.g., I want to post 3 times about fitness...">
+                </div>
+                <button class="btn-generate" onclick="generate('planner', this)">
+                    Create Schedule <i class="fa-regular fa-calendar-check"></i>
+                </button>
+                <div class="output-box" id="output-planner">Your schedule will appear here...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Function to switch tabs without reloading the page
+        function switchTool(toolName, btnElement) {
+            document.querySelectorAll('.tool-view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(toolName).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // 2. The API Connection
+        async function generate(toolType, btnElement) {
+            const inputValue = document.getElementById('input-' + toolType).value;
+            const outputBox = document.getElementById('output-' + toolType);
+            
+            if(!inputValue) {
+                outputBox.innerHTML = "<span style='color: #FF4DA6;'>Please enter a topic first.</span>";
+                return;
+            }
+
+            // 1. Show Loading State
+            const originalBtnText = btnElement.innerHTML;
+            btnElement.innerHTML = 'Generating... <i class="fa-solid fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
+            outputBox.innerHTML = "Thinking... <i class='fa-solid fa-spinner fa-spin'></i>";
+
+            try {
+                // 2. The Handshake: Send data to Member 2's Backend
+                // (When Member 2 starts their server, change this URL to http://localhost:5000/api/generate)
+                const response = await fetch('http://localhost:5000/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        tool: toolType, 
+                        input: inputValue 
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                
+                // 3. Display the Result
+                outputBox.innerText = data.result;
+
+            } catch (error) {
+                // Handle errors gracefully
+                outputBox.innerHTML = `<span style="color: #FF4DA6;">Error: Could not connect to the server. Ensure the backend is running.</span>`;
+                
+                // --- FAKE DATA FALLBACK FOR FRONTEND TESTING ---
+                // (Remove this block once Member 2's backend is live)
+                setTimeout(() => {
+                    outputBox.innerHTML = `<strong style="color: #fff;">[SIMULATED AI RESPONSE]</strong><br><br>Here is the generated ${toolType} for "${inputValue}". Member 2's backend is not running, so you are seeing this fake data. Once the server is on, this will be real AI text!`;
+                }, 1000);
+                // ------------------------------------------------
+
+            } finally {
+                // 4. Reset Button State
+                btnElement.innerHTML = originalBtnText;
+                btnElement.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

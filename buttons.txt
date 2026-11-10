@@ -1,0 +1,42 @@
+Contentora - Master Button & Navigation Map
+==============================================
+
+📄 1. HOME PAGE (index.html)
+│
+├── 🟢 Navigation Bar (Top)
+│   ├── Logo (Contentora)
+│   ├── Tab: Home
+│   ├── Tab: Tools (Dropdown)
+│   ├── Tab: Pricing
+│   └── Button: [Get Started Free]
+│
+└── 🟢 Hero Section (Center)
+    ├── Button: [Start Creating Free] (Primary Orange)
+    └── Button: [Watch Demo] (Secondary Outline)
+
+
+📄 2. AUTHENTICATION PAGES (login.html / signup.html)
+│
+├── 🟢 Login Form
+│   ├── Button: [Log In]
+│   └── Text Link: "Don't have an account? Sign Up"
+│
+└── 🟢 Signup Form
+    └── Button: [Create Account]
+
+
+📄 3. DASHBOARD - CLEAN UI (dashboard.html)
+│
+├── 🟢 Left Sidebar (Navigation)
+│   ├── Tab: Dashboard (Home Icon)
+│   ├── Tab: Idea Generator (Lightbulb Icon)
+│   ├── Tab: Script Writer (Pen Icon)
+│   ├── Tab: Trending Topics (Fire Icon)
+│   ├── Tab: Content Planner (Calendar Icon)
+│   ├── Tab: Captions & Hashtags (Hashtag Icon)
+│   └── User Avatar (Click to open Settings/Logout)
+│
+└── 🟢 Main Work Area (Inside any of the 5 Tools)
+    ├── Input Box (User types topic here)
+    ├── Button: [Generate] (Triggers AI)
+    └── Button: [Copy] (Small icon next to AI output to copy text)
