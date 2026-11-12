@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Contentora</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #050505; 
+            --pink: #FF007F; 
+            --pink-glow: rgba(255, 0, 127, 0.4);
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+            --font-body: 'Poppins', sans-serif;
+            --font-display: 'Orbitron', sans-serif; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            font-family: var(--font-body);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* =========================================
+           BACKGROUND EFFECTS
+           ========================================= */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -2; 
+            background-image: 
+                linear-gradient(to right, rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px; 
+            mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw; height: 60vw;
+            background: radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 60%);
+            z-index: -1;
+        }
+
+        /* =========================================
+           NAVBAR
+           ========================================= */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            width: 100%;
+            z-index: 100;
+            flex-shrink: 0; 
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white;}
+        .logo-icon {
+            width: 45px; height: 45px; border: 2px solid var(--pink); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--pink-glow);
+        }
+        .logo-icon i { color: var(--pink); font-size: 20px; }
+        .logo-box {
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 25px; border-radius: 8px;
+            font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 1px;
+        }
+
+        .nav-links { 
+            display: flex; gap: 40px; align-items: center; 
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        
+        .nav-link {
+            text-decoration: none; color: var(--text-muted); font-size: 15px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            padding-bottom: 5px; border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active { color: var(--text-main); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .nav-link.active { border-bottom: 2px solid var(--pink); }
+
+        .btn-login {
+            background: transparent; border: 1px solid var(--pink); color: var(--text-main);
+            padding: 12px 30px; border-radius: 8px; font-family: var(--font-body);
+            font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.1); transition: 0.3s;
+        }
+        .btn-login:hover { background: rgba(255, 0, 127, 0.1); box-shadow: 0 0 20px var(--pink-glow); }
+
+        /* DROPDOWNS */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 10, 15, 0.95); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 0, 127, 0.3); border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 0, 127, 0.1);
+            padding: 15px 20px; z-index: 100; margin-top: 15px; animation: fadeIn 0.2s ease;
+            min-width: 220px;
+        }
+        .dropdown-content::before {
+            content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg);
+            width: 12px; height: 12px; background: rgba(15, 10, 15, 0.95);
+            border-left: 1px solid rgba(255, 0, 127, 0.3); border-top: 1px solid rgba(255, 0, 127, 0.3);
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .dropdown-list li { color: #ccc; font-size: 14px; font-weight: 400; transition: 0.2s; }
+        .dropdown-list li:hover { color: var(--pink); transform: translateX(5px); }
+
+        /* =========================================
+           ABOUT PAGE CONTENT (COMPACT DESIGN)
+           ========================================= */
+        .about-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Hero */
+        .about-hero {
+            text-align: center;
+            max-width: 800px;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .about-hero h1 {
+            font-family: var(--font-display);
+            font-size: 38px; /* Smaller */
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+        .about-hero h1 span { color: var(--pink); text-shadow: 0 0 20px var(--pink-glow); }
+        .about-hero p { font-size: 15px; color: var(--text-muted); }
+
+        /* 2x2 Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .info-box {
+            background: rgba(20, 10, 15, 0.4);
+            border: 1px solid rgba(255, 0, 127, 0.15);
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-box:hover {
+            transform: translateY(-3px);
+            border-color: var(--pink);
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.1);
+        }
+
+        /* Top accent line */
+        .info-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; width: 80%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--pink), transparent);
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .info-box:hover::before { opacity: 1; }
+
+        .info-icon {
+            font-size: 24px;
+            color: var(--pink);
+        }
+
+        .info-box h2 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-box p {
+            font-size: 13px; /* Smaller text */
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .info-box .highlight {
+            color: var(--pink);
+            font-weight: 600;
+        }
+
+        /* Call to Action */
+        .cta-section {
+            text-align: center;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .btn-cta {
+            background: linear-gradient(90deg, #FF007F, #D00068);
+            color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px;
+            font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.3); transition: 0.3s;
+        }
+        .btn-cta:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 0, 127, 0.6); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 1200px) {
+            .nav-links { position: relative; left: 0; transform: none; gap: 20px; }
+        }
+        @media (max-width: 800px) {
+            .nav-links { display: none; }
+            .about-hero h1 { font-size: 28px; }
+            .info-grid { grid-template-columns: 1fr; } /* Stacks on mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="index.html" class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-crown"></i></div>
+            <div class="logo-box">Contentora</div>
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            
+            <div class="dropdown">
+                <a href="#" class="nav-link">Tools <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></a>
+                <div class="dropdown-content">
+                    <ul class="dropdown-list">
+                        <li>Full Content Package</li>
+                        <li>Script</li>
+                        <li>Thumbnail</li>
+                        <li>Video</li>
+                        <li>Tag</li>
+                        <li>Title</li>
+                        <li>Description</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <a href="#" class="nav-link">Features <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></a>
+                <div class="dropdown-content" style="min-width: 280px;">
+                    <ul class="dropdown-list">
+                        <li>Instant Generation</li>
+                        <li>Multi-Language Support</li>
+                        <li>Scene Duration Control</li>
+                        <li>AI Tool Integrations</li>
+                        <li>Smart Formatting</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <a href="about.html" class="nav-link active">About</a>
+            <a href="#" class="nav-link">Community</a>
+        </div>
+
+        <button class="btn-login" onclick="window.location.href='login.html'">
+            Log In
+        </button>
+    </nav>
+
+    <!-- ABOUT PAGE CONTENT -->
+    <div class="about-wrapper">
+        
+        <div class="about-hero">
+            <h1>We Built the Ultimate<br><span>AI Studio for Creators.</span></h1>
+            <p>The entire video production pipeline, condensed into one prompt.</p>
+        </div>
+
+        <!-- COMPACT 2x2 GRID -->
+        <div class="info-grid">
+            
+            <div class="info-box">
+                <i class="fa-solid fa-triangle-exclamation info-icon"></i>
+                <h2>The Problem</h2>
+                <p>Creators waste hours jumping between ChatGPT, Midjourney, and Runway. You lose creative flow just calculating scene timings.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fa-solid fa-wand-magic-sparkles info-icon"></i>
+                <h2>The Solution</h2>
+                <p>Contentora handles the heavy lifting. We generate the <span class="highlight">script</span>, <span class="highlight">thumbnail</span>, and <span class="highlight">video prompts</span> instantly.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fa-solid fa-rocket info-icon"></i>
+                <h2>The Mission</h2>
+                <p>To 10x the output of creators. Your time should be spent <span class="highlight">creating</span>, not copy-pasting text.</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fa-solid fa-bolt info-icon"></i>
+                <h2>Why Contentora?</h2>
+                <p>No signups. No complex interfaces. Just pure AI generation that gives you a blueprint in <span class="highlight">10 seconds</span>.</p>
+            </div>
+
+        </div>
+
+        <div class="cta-section">
+            <a href="idea.html" class="btn-cta">
+                Start Creating for Free <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>
