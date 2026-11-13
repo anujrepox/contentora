@@ -1,0 +1,1305 @@
+]<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Creative Studio - Contentora</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+    <meta name="description" content="Generate your complete video package.">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #050505; --pink: #FF007F; --text-main: #FFFFFF;
+            --text-muted: #A1A1AA; --green: #00FF88; --gold: #FFD700;
+            --font-body: 'Poppins', sans-serif; --font-robotic: 'Orbitron', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main); color: var(--text-main); height: 100vh; width: 100vw;
+            overflow: hidden; font-family: var(--font-body); display: flex;
+        }
+        .bg-grid {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; 
+            background-image: linear-gradient(to right, rgba(255, 0, 127, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 0, 127, 0.08) 1px, transparent 1px);
+            background-size: 60px 60px; mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+        .bg-glow {
+            position: absolute; top: 0; left: 0; width: 50%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 20% 50%, rgba(255, 0, 127, 0.12) 0%, transparent 60%);
+            transition: opacity 0.5s ease;
+        }
+        
+        .top-navbar { position: absolute; top: 30px; left: 40px; right: 40px; z-index: 999; display: flex; justify-content: space-between; align-items: center; pointer-events: none;}
+        
+        .btn-back, .btn-history {
+            pointer-events: auto; display: inline-flex; align-items: center; gap: 10px; background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 12px 24px;
+            border-radius: 50px; font-size: 14px; font-weight: 500; text-decoration: none; backdrop-filter: blur(10px); transition: 0.3s; cursor: pointer;
+        }
+        .btn-back:hover { background: rgba(255, 0, 127, 0.1); border-color: var(--pink); color: var(--pink); transform: translateX(-5px); }
+        .btn-history:hover { background: rgba(255, 0, 127, 0.1); border-color: var(--pink); color: var(--pink); transform: translateX(5px); box-shadow: 0 0 15px rgba(255,0,127,0.2); }
+
+        .layout-container { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; gap: 40px; }
+        .left-character { flex: 0.7; height: 100%; display: flex; align-items: flex-end; justify-content: flex-end; padding-right: 20px; }
+        .left-character img { width: 100%; max-width: 400px; max-height: 85vh; object-fit: contain; -webkit-mask-image: radial-gradient(ellipse at center, black 60%, transparent 95%); mask-image: radial-gradient(ellipse at center, black 60%, transparent 95%); filter: drop-shadow(0px 0px 40px rgba(255, 0, 127, 0.2)); }
+
+        .right-workspace { 
+            flex: 1.3; height: 100%; display: flex; flex-direction: column; 
+            justify-content: center; padding: 30px 40px; 
+            position: relative; z-index: 1; overflow: hidden;
+            align-items: flex-start; 
+        }
+        
+        .initial-view { 
+            width: 100%; max-width: 680px; display: flex; flex-direction: column; 
+            transition: opacity 0.5s ease; margin-left: 5%; 
+        }
+        .initial-view.hidden { display: none; }
+        .fade-text { font-family: var(--font-robotic); font-size: 24px; color: #fff; text-shadow: 0 0 15px rgba(255, 0, 127, 0.2); opacity: 0; transition: opacity 1s ease-in-out; margin-bottom: 15px;}
+        .fade-text.visible { opacity: 1; }
+
+        .input-wrapper { 
+            position: relative; width: 100%; background: rgba(0,0,0,0.4); 
+            border: 1px solid var(--pink); box-shadow: 0 0 15px rgba(255, 0, 127, 0.15);
+            border-radius: 16px; display: flex; flex-direction: column; 
+            height: 180px; transition: 0.3s;
+        }
+        .input-wrapper:focus-within { border-color: var(--pink); box-shadow: 0 0 30px rgba(255, 0, 127, 0.4); }
+        
+        textarea { 
+            width: 100%; height: 110px; background: transparent; border: none; color: white; 
+            font-size: 15px; font-family: var(--font-body); padding: 20px 20px 10px 20px; 
+            resize: none; outline: none; line-height: 1.5; 
+            padding-right: 130px; 
+        }
+        textarea::placeholder { color: #777; }
+
+        .bottom-bar { 
+            position: absolute; bottom: 10px; left: 15px; right: 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255, 255, 255, 0.03); padding: 8px 12px;
+            border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .controls-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        .custom-dropdown { position: relative; user-select: none; font-family: var(--font-body); font-size: 11px; font-weight: 500; }
+        .dropdown-trigger {
+            background-color: rgba(20, 10, 15, 0.8); border: 1px solid rgba(255, 0, 127, 0.4); color: #fff;
+            padding: 7px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; transition: all 0.3s ease;
+        }
+        .custom-dropdown:hover .dropdown-trigger, .custom-dropdown.active .dropdown-trigger {
+            border-color: var(--pink); box-shadow: 0 0 15px rgba(255, 0, 127, 0.3); background-color: rgba(255, 0, 127, 0.1);
+        }
+        .dropdown-trigger i { color: var(--pink); font-size: 10px; transition: 0.3s; }
+        .custom-dropdown.active .dropdown-trigger i { transform: rotate(180deg); }
+        .dropdown-options {
+            display: none; position: absolute; top: 100%; left: 0; width: 100%; min-width: 140px;
+            background: rgba(15, 10, 15, 0.95); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 0, 127, 0.3); border-radius: 8px; padding: 6px; margin-top: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 0, 127, 0.1); z-index: 100;
+        }
+        .custom-dropdown.active .dropdown-options { display: block; animation: fadeInDown 0.2s ease; }
+        .option { padding: 10px 14px; color: #ccc; cursor: pointer; border-radius: 6px; transition: 0.2s; white-space: nowrap; }
+        .option:hover { background: rgba(255, 0, 127, 0.15); color: white; }
+        .option.selected { background: rgba(255, 0, 127, 0.2); color: var(--pink); font-weight: 600; }
+
+        .submit-arrow { color: var(--pink); font-size: 20px; cursor: pointer; background: transparent; border: none; transition: 0.3s; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .submit-arrow:hover { background: rgba(255, 0, 127, 0.1); transform: translateX(3px); }
+
+        .chat-view { width: 100%; max-width: 850px; display: none; flex-direction: column; height: 95%; justify-content: center;}
+        .chat-view.active { display: flex; animation: fadeIn 0.5s ease; }
+        .user-prompt { font-family: var(--font-robotic); font-size: 22px; color: #ffffff; margin-bottom: 15px; }
+        
+        .loading-indicator { display: none; flex-direction: column; gap: 10px; color: var(--text-muted); font-size: 16px; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,0,127,0.3); }
+        .loading-indicator.active { display: flex; }
+        .loading-indicator i { color: var(--pink); font-size: 24px; animation: spin 1.5s linear infinite; margin-bottom: 10px; }
+        
+        .terminal-line { font-family: monospace; font-size: 13px; color: #FFFFFF; opacity: 0; animation: fadeIn 0.3s forwards; }
+
+        .slideshow-window { width: 100%; flex: 1; overflow: hidden; position: relative; border-radius: 20px; }
+        .slideshow-track { display: flex; height: 100%; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        .slideshow-window.grid-mode .slideshow-track {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; transform: none !important; overflow-y: auto; height: 100%; padding: 10px 10px 50px 10px;
+        }
+        .slideshow-window.grid-mode .slide { min-width: 0; height: auto; padding-right: 0; }
+        .slideshow-window.grid-mode .paper-card { height: 100%; min-height: 250px; }
+
+        .slide { min-width: 100%; height: 100%; padding-right: 20px; display: flex; flex-direction: column; }
+
+        .paper-card { 
+            background: rgba(15, 5, 10, 0.4); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 0, 127, 0.4); border-radius: 20px; padding: 25px 30px; 
+            height: 100%; box-shadow: 0 0 40px rgba(255, 0, 127, 0.15); 
+            display: flex; flex-direction: column; overflow: hidden; justify-content: flex-start; 
+            position: relative;
+        }
+        
+        .paper-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 40px;
+            background: linear-gradient(to top, rgba(15, 5, 10, 0.8) 0%, transparent 100%);
+            pointer-events: none;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .paper-title { 
+            font-family: var(--font-robotic); font-size: 15px; color: var(--pink); margin-bottom: 20px; 
+            border-bottom: 1px solid rgba(255, 0, 127, 0.3); padding-bottom: 15px; 
+            text-align: left; width: 100%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .paper-title i { font-size: 18px; flex-shrink: 0; }
+        
+        .title-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .time-badge {
+            font-size: 11px; 
+            background: rgba(255,0,127,0.15); 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            color: #FFFFFF; 
+            font-weight: 600;
+            flex-shrink: 0;
+            font-family: monospace;
+            border: 1px solid rgba(255,0,127,0.4);
+        }
+
+        .paper-content {
+            flex: 1; color: #e0e0e0; font-size: 15px; line-height: 1.7; overflow-y: auto;
+            white-space: normal; text-align: left !important; padding: 0 0 30px 0; margin: 0; display: block; 
+        }
+        .paper-content::-webkit-scrollbar { display: none; }
+        .paper-content { -ms-overflow-style: none; scrollbar-width: none; }
+        .paper-content.large-text {
+            font-family: var(--font-robotic); font-size: 24px; color: #fff; line-height: 1.5;
+            text-shadow: 0 0 15px rgba(255,255,255,0.2); display: block !important; 
+            text-align: left !important; width: 100%; padding: 10px 0 30px 0; margin: 0;
+            word-wrap: break-word; white-space: normal; border-bottom: 1px dashed rgba(255,255,255,0.1); margin-bottom: 20px;
+        }
+        
+        .copy-btn { background: rgba(255, 0, 127, 0.1); border: 1px solid var(--pink); color: var(--pink); padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; z-index: 2;}
+        .copy-btn:hover { background: var(--pink); color: white; }
+
+        .mini-btn-group { display: flex; gap: 8px; }
+        .mini-btn {
+            background: rgba(255, 0, 127, 0.1);
+            border: 1px solid var(--pink);
+            color: var(--pink);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mini-btn:hover, .mini-btn.active-platform {
+            background: var(--pink);
+            color: white;
+            box-shadow: 0 0 10px var(--pink-glow);
+        }
+        
+        .mini-copy-btn {
+            background: rgba(255, 0, 127, 0.1);
+            border: 1px solid var(--pink);
+            color: var(--pink);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .mini-copy-btn:hover {
+            background: var(--pink);
+            color: white;
+            box-shadow: 0 0 10px var(--pink-glow);
+        }
+        
+        .tags-display { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tags-display span { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #E5E5E5; padding: 8px 15px; border-radius: 20px; font-size: 13px; }
+
+        .tts-btn { background: transparent; border: none; color: var(--pink); font-size: 14px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; font-weight: 600;}
+        .tts-btn:hover { transform: scale(1.05); text-shadow: 0 0 10px var(--pink); color: white;}
+
+        .tools-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); flex-wrap: wrap; }
+        .tool-link {
+            display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: white;
+            font-size: 12px; font-weight: 500; padding: 6px 12px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; transition: 0.3s;
+        }
+        .tool-link:hover { background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+        
+        .tool-logo-img { width: 16px; height: 16px; object-fit: contain; border-radius: 4px; }
+
+        .thumbnail-preview {
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; 
+            overflow: hidden; position: relative; border: 2px solid #333; margin-top: 15px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: aspect-ratio 0.3s ease;
+        }
+        .thumbnail-preview.vertical { aspect-ratio: 9/16; max-width: 300px; margin: 15px auto 0 auto; }
+        .thumbnail-preview img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: transform 0.3s ease; }
+        
+        .thumbnail-text-overlay {
+            position: absolute; bottom: 10%; left: 5%; width: 90%; z-index: 2;
+            font-family: var(--font-robotic); font-size: 32px; font-weight: 900; color: white;
+            text-transform: uppercase; line-height: 1.1; text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            pointer-events: none;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        .thumb-skeleton {
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, #1a0a12 25%, #2a1020 50%, #1a0a12 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes kenburns {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-2%, -2%); }
+        }
+        .ken-burns-active { animation: kenburns 10s ease-in-out infinite alternate !important; }
+        .video-preview-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s;
+        }
+        .thumbnail-preview:hover .video-preview-overlay { opacity: 1; }
+        .play-btn-circle {
+            width: 60px; height: 60px; background: var(--pink); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;
+            box-shadow: 0 0 30px var(--pink-glow); padding-left: 5px;
+        }
+
+        .slide-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 0 10px; }
+        .nav-btn {
+            background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 0, 127, 0.4); color: white;
+            padding: 10px 20px; border-radius: 50px; cursor: pointer; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s; flex-shrink: 0;
+        }
+        .nav-btn:hover { background: var(--pink); color: white; box-shadow: 0 0 20px rgba(255,0,127,0.4); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; background: rgba(20,20,20,0.8); border-color: rgba(255,255,255,0.1); box-shadow: none;}
+        
+        .slide-dots { display: flex; gap: 6px; justify-content: flex-start; max-width: 200px; overflow-x: auto; padding-bottom: 5px; margin: 0 15px;}
+        .slide-dots::-webkit-scrollbar { display: none; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); transition: 0.3s; flex-shrink: 0;}
+        .dot.active { background: var(--pink); box-shadow: 0 0 10px var(--pink); width: 16px; border-radius: 5px; }
+
+        .history-modal {
+            position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+            background: rgba(10, 5, 10, 0.98); border-left: 1px solid var(--pink);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8); z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex; flex-direction: column; padding: 30px 20px;
+        }
+        .history-modal.open { right: 0; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,0,127,0.3); padding-bottom: 15px; }
+        .history-header h3 { font-family: var(--font-robotic); color: var(--pink); font-size: 18px; text-transform: uppercase; letter-spacing: 1px;}
+        .close-history { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; transition: 0.3s; }
+        .close-history:hover { color: var(--pink); transform: rotate(90deg); }
+        .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .history-item {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px;
+            border-radius: 10px; cursor: pointer; transition: 0.3s;
+        }
+        .history-item:hover { border-color: var(--pink); background: rgba(255,0,127,0.1); transform: translateX(-5px); }
+        .history-item h4 { font-size: 14px; color: white; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .history-item p { font-size: 12px; color: var(--text-muted); }
+        .empty-history { color: var(--text-muted); text-align: center; margin-top: 50px; font-size: 14px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        @media (max-width: 900px) { 
+            .left-character { display: none; } 
+            .history-modal { width: 100%; right: -100%; }
+            .paper-content.large-text { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="top-navbar">
+        <a href="index.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        <button class="btn-history" id="top-history-btn" onclick="toggleHistory()">
+            <i class="fa-solid fa-clock-rotate-left"></i> History
+        </button>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="history-modal" id="history-modal">
+        <div class="history-header">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Your History</h3>
+            <button class="close-history" onclick="toggleHistory()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div class="layout-container">
+        
+        <div class="left-character">
+            <img src="anime-boy-full.png" alt="Anime Creator">
+        </div>
+
+        <div class="right-workspace">
+            
+            <div class="initial-view" id="initial-view">
+                <div class="fade-text" id="fade-text"></div>
+                
+                <div class="input-wrapper">
+                    <!-- Top Right Platform Selector -->
+                    <div style="position: absolute; top: 15px; right: 15px; z-index: 10;">
+                        <div class="custom-dropdown" id="platform-dropdown">
+                            <div class="dropdown-trigger" style="background: rgba(20, 10, 15, 0.9);">
+                                <span class="selected-text"><i class="fa-brands fa-youtube" style="color: #FF0000; margin-right: 6px;"></i> YouTube</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-options" style="right: 0; left: auto; min-width: 150px;">
+                                <div class="option selected" data-value="youtube"><i class="fa-brands fa-youtube" style="color: #FF0000;"></i> YouTube</div>
+                                <div class="option" data-value="shorts"><i class="fa-brands fa-youtube" style="color: #FF0000;"></i> YT Shorts</div>
+                                <div class="option" data-value="instagram"><i class="fa-brands fa-instagram" style="color: #E1306C;"></i> Reels</div>
+                                <div class="option" data-value="tiktok"><i class="fa-brands fa-tiktok"></i> TikTok</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <textarea id="user-input" maxlength="500" placeholder="Describe your video idea... (e.g. 'A sci-fi story about a lost robot')" onkeydown="handleEnter(event)"></textarea>
+                    
+                    <div class="bottom-bar">
+                        <div class="controls-group">
+                            <div class="custom-dropdown" id="lang-dropdown">
+                                <div class="dropdown-trigger">
+                                    <span class="selected-text">English</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="option selected" data-value="English">English</div>
+                                    <div class="option" data-value="Hindi">Hindi</div>
+                                    <div class="option" data-value="Bengali">Bengali</div>
+                                    <div class="option" data-value="Hinglish">Hinglish</div>
+                                </div>
+                            </div>
+
+                            <div class="custom-dropdown" id="tone-dropdown">
+                                <div class="dropdown-trigger">
+                                    <span class="selected-text">Cinematic</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="option selected" data-value="Cinematic">Cinematic</div>
+                                    <div class="option" data-value="Comedic">Comedic</div>
+                                    <div class="option" data-value="Nostalgic">Nostalgic</div>
+                                    <div class="option" data-value="Documentary">Documentary</div>
+                                    <div class="option" data-value="Cyberpunk">Cyberpunk</div>
+                                </div>
+                            </div>
+
+                            <div class="custom-dropdown" id="duration-dropdown">
+                                <div class="dropdown-trigger">
+                                    <span class="selected-text">1 Min</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="option selected" data-value="1">1 Min</div>
+                                    <div class="option" data-value="2">2 Min</div>
+                                    <div class="option" data-value="5">5 Min</div>
+                                    <div class="option" data-value="custom">Custom</div>
+                                </div>
+                            </div>
+
+                            <div class="custom-dropdown" id="scene-dropdown">
+                                <div class="dropdown-trigger">
+                                    <span class="selected-text">5s / Scene</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="option selected" data-value="5">5s / Scene</div>
+                                    <div class="option" data-value="10">10s / Scene</div>
+                                    <div class="option" data-value="20">20s / Scene</div>
+                                    <div class="option" data-value="30">30s / Scene</div>
+                                </div>
+                            </div>
+
+                            <div class="custom-dropdown" id="model-dropdown">
+                                <div class="dropdown-trigger">
+                                    <span class="selected-text">Free Engine</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-options">
+                                    <div class="option selected" data-value="pollinations">Free Engine</div>
+                                    <div class="option" data-value="groq">Groq (Fast)</div>
+                                    <div class="option" data-value="google">Google Gemini</div>
+                                    <div class="option" data-value="openrouter">OpenRouter</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="submit-arrow" onclick="generate()"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDESHOW VIEW -->
+            <div class="chat-view" id="chat-view">
+                <div class="user-prompt" id="chat-user-input"></div>
+                
+                <div class="loading-indicator" id="loading-state">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>AI Director is building your blueprint...</span>
+                        <span id="engine-badge" style="font-size: 10px; background: rgba(0,255,136,0.1); border: 1px solid #00FF88; color: #00FF88; padding: 2px 8px; border-radius: 10px; font-family: monospace; transition: 0.3s;">ENGINE: FREE</span>
+                    </div>
+                    <div id="terminal-logs" style="display: flex; flex-direction: column; gap: 5px;"></div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 15px; overflow: hidden;">
+                        <div id="loading-bar" style="width: 0%; height: 100%; background: var(--pink); box-shadow: 0 0 10px var(--pink); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div class="slideshow-window" id="slideshow-window" style="display:none;">
+                    <div class="slideshow-track" id="slideshow-track"></div>
+                </div>
+
+                <div class="slide-controls" id="slide-controls" style="display:none;">
+                    <button class="nav-btn" id="prev-btn" onclick="prevSlide()"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+                    
+                    <button class="nav-btn" onclick="toggleView()" id="view-toggle-btn" style="font-size: 11px; padding: 8px 15px;">
+                        <i class="fa-solid fa-table-cells"></i> Storyboard
+                    </button>
+                    
+                    <div class="slide-dots" id="slide-dots"></div>
+                    <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let currentBlueprint = null;
+        let isGridMode = false;
+        let activePrompt = "";
+
+        // --- 1. CUSTOM DROPDOWN LOGIC ---
+        document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+            const trigger = dropdown.querySelector('.dropdown-trigger');
+            const options = dropdown.querySelectorAll('.option');
+            const selectedText = dropdown.querySelector('.selected-text');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.custom-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('active');
+                });
+                dropdown.classList.toggle('active');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    selectedText.innerHTML = option.innerHTML;
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    dropdown.classList.remove('active');
+                });
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('active'));
+        });
+
+        function getSelectedValue(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const selectedOption = dropdown.querySelector('.option.selected');
+            return selectedOption ? selectedOption.getAttribute('data-value') : dropdown.querySelector('.option').getAttribute('data-value');
+        }
+
+        // --- 2. FADE TEXT ANIMATION ---
+        const phrases = ["Got an Idea? Let's Make It Happen.", "Every Great Creation Starts Somewhere.", "Your Next Big Idea Starts Here."];
+        let phraseIndex = 0;
+        const textElement = document.getElementById('fade-text');
+        setInterval(() => {
+            textElement.classList.remove('visible');
+            setTimeout(() => {
+                textElement.textContent = phrases[phraseIndex];
+                textElement.classList.add('visible');
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+            }, 1000);
+        }, 4000);
+        textElement.textContent = phrases[0];
+        setTimeout(() => textElement.classList.add('visible'), 500);
+
+        function handleEnter(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                generate();
+            }
+        }
+
+        // --- 3. INITIALIZATION & HISTORY LOGIC ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(location.search);
+            
+            const incomingPrompt = params.get('prompt');
+            if (incomingPrompt) {
+                document.getElementById('user-input').value = incomingPrompt;
+            }
+
+            if (params.get('demo') === 'true') {
+                document.getElementById('user-input').value = "A dog pulls off a pizza heist in Tokyo";
+                setTimeout(() => generate(), 300);
+                return; 
+            }
+
+            const saved = localStorage.getItem('lastBlueprint');
+            const isNewSession = document.referrer.includes('index.html') || document.referrer === '';
+
+            if (saved && !incomingPrompt && !isNewSession) {
+                currentBlueprint = JSON.parse(saved);
+                renderBlueprint(currentBlueprint);
+            } else {
+                document.getElementById('initial-view').classList.remove('hidden');
+                document.getElementById('chat-view').classList.remove('active');
+            }
+
+            renderHistoryList();
+        });
+
+        function toggleHistory() {
+            const modal = document.getElementById('history-modal');
+            modal.classList.toggle('open');
+            if(modal.classList.contains('open')) {
+                renderHistoryList();
+            }
+        }
+
+        function renderHistoryList() {
+            const list = document.getElementById('history-list');
+            const history = JSON.parse(localStorage.getItem('contentoraHistory') || '[]');
+            list.innerHTML = '';
+
+            if (history.length === 0) {
+                list.innerHTML = '<div class="empty-history">No previous generations found.</div>';
+                return;
+            }
+
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.onclick = () => loadHistoryItem(index);
+                div.innerHTML = `
+                    <h4>${item.videoTitle}</h4>
+                    <p>${new Date(item.timestamp).toLocaleString()}</p>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function loadHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('contentoraHistory') || '[]');
+            if (history[index]) {
+                currentBlueprint = history[index].blueprint;
+                localStorage.setItem('lastBlueprint', JSON.stringify(currentBlueprint));
+                renderBlueprint(currentBlueprint);
+                toggleHistory(); 
+            }
+        }
+
+        function saveToHistory(blueprint) {
+            let history = JSON.parse(localStorage.getItem('contentoraHistory') || '[]');
+            history.unshift({
+                videoTitle: blueprint.videoTitle,
+                timestamp: Date.now(),
+                blueprint: blueprint
+            });
+            history = history.slice(0, 10);
+            localStorage.setItem('contentoraHistory', JSON.stringify(history));
+            localStorage.setItem('lastBlueprint', JSON.stringify(blueprint));
+        }
+
+        // --- 4. STREAMING GENERATION LOGIC ---
+        async function generate() {
+            const inputValue = document.getElementById('user-input').value;
+            if(!inputValue) { alert("Please type an idea first!"); return; }
+
+            activePrompt = inputValue;
+            const platform = getSelectedValue('platform-dropdown');
+            const language = getSelectedValue('lang-dropdown');
+            const tone = getSelectedValue('tone-dropdown');
+            let duration = getSelectedValue('duration-dropdown');
+            const sceneLength = parseInt(getSelectedValue('scene-dropdown'));
+            const aiModel = getSelectedValue('model-dropdown');
+
+            if (duration === 'custom') {
+                let customDur = prompt("Enter custom duration in minutes (e.g. 3):");
+                if (!customDur || isNaN(customDur)) return;
+                duration = customDur;
+            }
+
+            const totalSeconds = parseInt(duration) * 60;
+            const totalScenes = Math.ceil(totalSeconds / sceneLength);
+
+            if (totalScenes > 15) {
+                alert(`⚠️ Limit Exceeded!\n\nYou requested ${totalScenes} scenes. The limit is 15 scenes per video.`);
+                return;
+            }
+
+            document.getElementById('initial-view').classList.add('hidden');
+            document.getElementById('chat-view').classList.add('active');
+            document.getElementById('chat-user-input').innerText = inputValue; 
+            
+            document.getElementById('loading-state').classList.add('active');
+            document.getElementById('slideshow-window').style.display = 'none';
+            document.getElementById('slide-controls').style.display = 'none';
+            document.getElementById('top-history-btn').style.display = 'none';
+
+            const engineBadge = document.getElementById('engine-badge');
+            engineBadge.innerText = `ENGINE: ${aiModel.toUpperCase()}`;
+            engineBadge.style.color = aiModel === 'groq' ? '#FF007F' : '#00FF88';
+            engineBadge.style.borderColor = aiModel === 'groq' ? '#FF007F' : '#00FF88';
+
+            const logContainer = document.getElementById('terminal-logs');
+            const progressBar = document.getElementById('loading-bar');
+            logContainer.innerHTML = '<div class="terminal-line visible">> Initializing connection...</div>';
+            progressBar.style.width = '10%';
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: inputValue, platform, language, tone, duration, sceneLength, totalScenes, aiModel
+                    })
+                });
+
+                if (!response.ok) throw new Error(`Server returned ${response.status}`);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullJsonString = "";
+                let chunkBuffer = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    chunkBuffer += decoder.decode(value, { stream: true });
+                    const lines = chunkBuffer.split('\n');
+                    chunkBuffer = lines.pop(); 
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.substring(6).trim();
+                            if (!dataStr || dataStr === '[DONE]') continue;
+                            
+                            try {
+                                const data = JSON.parse(dataStr);
+                                
+                                if (data.chunk) {
+                                    progressBar.style.width = `${Math.min(90, parseFloat(progressBar.style.width) + 2)}%`;
+                                    const snippet = data.chunk.replace(/\n/g, ' ').substring(0, 50);
+                                    if (snippet.length > 5) {
+                                        logContainer.innerHTML = `<div class="terminal-line visible" style="color: var(--green); font-size: 11px;">> ${snippet}...</div>`;
+                                    }
+                                }
+
+                                if (data.done) {
+                                    progressBar.style.width = '100%';
+                                    fullJsonString = data.fullText;
+                                }
+                                
+                                if (data.error) throw new Error(data.error);
+                            } catch (e) {
+                                console.error("Stream parse error", e, dataStr);
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById('loading-state').classList.remove('active');
+                document.getElementById('chat-user-input').innerText = ''; 
+
+                if (!fullJsonString) throw new Error("No data received from server");
+
+                let blueprint;
+                try {
+                    blueprint = JSON.parse(fullJsonString);
+                    blueprint.platform = platform; 
+                    currentBlueprint = blueprint;
+                    saveToHistory(blueprint);
+                } catch (e) {
+                    alert("Error parsing final AI response: " + e.message);
+                    document.getElementById('chat-view').classList.remove('active');
+                    document.getElementById('initial-view').classList.remove('hidden');
+                    document.getElementById('top-history-btn').style.display = 'inline-flex';
+                    return;
+                }
+
+                renderBlueprint(blueprint);
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                document.getElementById('loading-state').classList.remove('active');
+                document.getElementById('chat-view').classList.remove('active');
+                document.getElementById('initial-view').classList.remove('hidden');
+                document.getElementById('top-history-btn').style.display = 'inline-flex';
+
+                const errBox = document.createElement('div');
+                errBox.style.cssText = 'background: rgba(255,0,127,0.1); border: 1px solid #FF007F; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 14px;';
+                errBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#FF007F;"></i> Connection lost. Please try again.';
+                document.getElementById('initial-view').appendChild(errBox);
+                setTimeout(() => errBox.remove(), 4000);
+            }
+        }
+
+        // --- 5. RENDER BLUEPRINT ---
+        function renderBlueprint(blueprint) {
+            const track = document.getElementById('slideshow-track');
+            const dotsContainer = document.getElementById('slide-dots');
+            const chatView = document.getElementById('chat-view');
+            
+            const oldSwitcher = document.getElementById('platform-switcher');
+            if(oldSwitcher) oldSwitcher.remove();
+
+            const switcherHTML = `
+                <div id="platform-switcher" style="display: flex; gap: 10px; margin-bottom: 15px; width: 100%;">
+                    <button class="mini-btn ${blueprint.platform === 'youtube' ? 'active-platform' : ''}" onclick="switchPlatform('youtube')">YouTube</button>
+                    <button class="mini-btn ${blueprint.platform === 'shorts' ? 'active-platform' : ''}" onclick="switchPlatform('shorts')">YT Shorts</button>
+                    <button class="mini-btn ${blueprint.platform === 'instagram' ? 'active-platform' : ''}" onclick="switchPlatform('instagram')">Reels</button>
+                    <button class="mini-btn ${blueprint.platform === 'tiktok' ? 'active-platform' : ''}" onclick="switchPlatform('tiktok')">TikTok</button>
+                </div>
+            `;
+            chatView.insertBefore(switcherHTML ? document.createRange().createContextualFragment(switcherHTML) : null, document.getElementById('loading-state'));
+
+            track.innerHTML = ''; 
+            dotsContainer.innerHTML = '';
+            isGridMode = false;
+            document.getElementById('slideshow-window').classList.remove('grid-mode');
+            document.getElementById('view-toggle-btn').innerHTML = '<i class="fa-solid fa-table-cells"></i> Storyboard';
+
+            const isShort = blueprint.platform === 'instagram' || blueprint.platform === 'tiktok' || blueprint.platform === 'shorts';
+
+            const slidesData = [
+                { title: '<i class="fa-solid fa-heading"></i> Video Title', content: blueprint.videoTitle, altTitles: blueprint.alternativeTitles, isLarge: true }
+            ];
+
+            if (blueprint.platform === 'youtube') {
+                slidesData.push({ title: '<i class="fa-regular fa-image"></i> Thumbnail Preview', thumbPrompt: blueprint.thumbnailPrompt, thumbTitle: blueprint.videoTitle, isThumbnail: true });
+            } else {
+                slidesData.push({ title: '<i class="fa-solid fa-bolt"></i> Visual Hook (0:00)', hookPrompt: blueprint.thumbnailPrompt, isVisualHook: true });
+            }
+
+            slidesData.push(
+                { title: '<i class="fa-solid fa-align-left"></i> Description', content: blueprint.videoDescription, isLarge: false },
+                { title: '<i class="fa-solid fa-hashtag"></i> Tags & Hashtags', content: blueprint.tags, isTags: true },
+                { title: '<i class="fa-solid fa-music"></i> Audio Direction', content: blueprint, isAudio: true },
+                { 
+                    title: `<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span><i class="fa-solid fa-robot"></i> Master AI Prompt</span>
+                                <div class="mini-btn-group">
+                                    <button class="mini-btn" onclick="speakEntireScript(this)"><i class="fa-solid fa-play"></i> Play</button>
+                                    <button class="mini-btn" onclick="copyForCapCut()"><i class="fa-solid fa-scissors"></i> CapCut</button>
+                                    <button class="mini-btn" onclick="downloadPackage()"><i class="fa-solid fa-download"></i> ZIP</button>
+                                </div>
+                            </div>`, 
+                    content: blueprint, 
+                    isMasterPrompt: true 
+                } 
+            );
+
+            blueprint.scenes.forEach((scene, index) => {
+                const startSec = index * 5; 
+                const endSec = (index + 1) * 5;
+                const formatTime = (sec) => {
+                    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+                    const s = String(sec % 60).padStart(2, '0');
+                    return `${m}:${s}`;
+                };
+                
+                let rawTitle = scene.title || "Scene";
+                if (rawTitle.length > 35) rawTitle = rawTitle.substring(0, 35) + "...";
+
+                let arcBadge = "";
+                if (index < 2) arcBadge = `<span style="font-size: 9px; background: rgba(0,255,136,0.2); color: var(--green); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">ACT 1</span>`;
+                else if (index === blueprint.scenes.length - 1) arcBadge = `<span style="font-size: 9px; background: rgba(255,0,127,0.2); color: var(--pink); padding: 2px 6px; border-radius: 4px; margin-right: 5px;">ACT 3</span>`;
+                else arcBadge = `<span style="font-size: 9px; background: rgba(255,215,0,0.2); color: gold; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">ACT 2</span>`;
+
+                slidesData.push({ 
+                    title: `<i class="fa-solid fa-film"></i> ${arcBadge} <span class="title-text">Scene ${scene.scene}: ${rawTitle}</span> <span class="time-badge">[${formatTime(startSec)} - ${formatTime(endSec)}]</span>`, 
+                    content: scene, isScene: true, isFirstScene: scene.scene === 1 
+                });
+            });
+
+            const logos = {
+                midjourney: `<img src="https://cdn.simpleicons.org/midjourney/white" class="tool-logo-img" style="background: black; padding: 2px;" alt="Midjourney">`,
+                runway: `<img src="https://cdn.simpleicons.org/runway/white" class="tool-logo-img" style="background: black; padding: 2px;" alt="Runway">`,
+                elevenlabs: `<img src="https://cdn.simpleicons.org/elevenlabs/white" class="tool-logo-img" style="background: black; padding: 2px;" alt="ElevenLabs">`
+            };
+
+            slidesData.forEach((slideData, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide';
+                
+                slideDiv.style.opacity = '0';
+                slideDiv.style.transform = 'translateY(15px)';
+
+                let innerHTML = `<div class="paper-card"><div class="paper-title">${slideData.title}</div>`;
+
+                if (slideData.isVisualHook) {
+                    const hookTitle = blueprint.platform === 'instagram' ? 'AESTHETIC COVER FRAME' : blueprint.platform === 'tiktok' ? 'POV: FIRST FRAME' : 'SCROLL-STOPPER FRAME';
+                    innerHTML += `
+                        <div class="paper-content">
+                            <p style="color: #A1A1AA; font-size: 13px; margin-bottom: 15px;">This platform auto-generates covers. Use this prompt to generate the exact first frame of your video. It must grab attention instantly.</p>
+                            <div class="thumbnail-preview vertical" style="cursor: default; margin: 0 auto; border: 2px solid var(--pink); box-shadow: 0 0 20px rgba(255,0,127,0.3);">
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 3; width: 80%;">
+                                    <i class="fa-solid fa-bolt" style="font-size: 40px; color: var(--pink); margin-bottom: 10px; text-shadow: 0 0 20px var(--pink-glow);"></i>
+                                    <h3 style="font-family: var(--font-robotic); font-size: 14px; color: white;">${hookTitle}</h3>
+                                </div>
+                            </div>
+                            <div class="prompt-box" style="margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="color: var(--pink);">Visual Prompt</strong>
+                                    <button class="mini-copy-btn" onclick="copyText(this, '${slideData.hookPrompt.replace(/'/g, "\\'")}')">
+                                        <i class="fa-regular fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <p style="font-size: 13px; color: #A1A1AA; font-family: monospace;">${slideData.hookPrompt}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (slideData.isThumbnail) {
+                    innerHTML += `
+                        <div class="paper-content" style="overflow-y: hidden; display: flex; flex-direction: column; justify-content: center;">
+                            <div class="thumbnail-preview" id="thumb-preview-${index}">
+                                <div class="thumb-skeleton"></div>
+                            </div>
+                            
+                            <button class="copy-btn" style="margin-top: 20px;" onclick="copyText(this, '${blueprint.thumbnailPrompt.replace(/'/g, "\\'")}')">
+                                <i class="fa-regular fa-copy"></i> Copy Thumbnail Prompt
+                            </button>
+                        </div>
+                    `;
+                } else if (slideData.isAudio) {
+                    const isShortForm = blueprint.platform !== 'youtube';
+                    const musicTitle = isShortForm ? 'TRENDING AUDIO 🎵' : 'CINEMATIC BACKGROUND MUSIC 🎻';
+                    const sfxTitle = isShortForm ? 'TEXT-TO-SPEECH / VOICE FX 🤖' : 'SOUND EFFECTS & SOUND DESIGN 🔊';
+
+                    innerHTML += `
+                        <div class="paper-content">
+                            <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);">
+                                <h3 style="color:var(--pink); margin-bottom:12px; font-family: var(--font-robotic); font-size: 14px; letter-spacing: 1px;"><i class="fa-solid fa-music"></i> ${musicTitle}</h3>
+                                <p style="color: #fff; font-size: 15px; line-height: 1.6;">${slideData.content.musicSuggestion || 'Upbeat Lo-Fi Hip Hop'}</p>
+                            </div>
+                            
+                            <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);">
+                                <h3 style="color:var(--pink); margin-bottom:12px; font-family: var(--font-robotic); font-size: 14px; letter-spacing: 1px;"><i class="fa-solid fa-volume-high"></i> ${sfxTitle}</h3>
+                                <p style="color: #fff; font-size: 15px; line-height: 1.6;">${slideData.content.sfxSuggestion || 'Whoosh transitions, Camera shutter'}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (slideData.isMasterPrompt) {
+                    let masterText = `PROJECT: ${slideData.content.videoTitle}\n\nDESCRIPTION:\n${slideData.content.videoDescription}\n\nTAGS:\n${slideData.content.tags.join(' ')}\n\nAUDIO:\nMusic: ${slideData.content.musicSuggestion}\nSFX: ${slideData.content.sfxSuggestion}\n\nSCENES:\n`;
+                    slideData.content.scenes.forEach(s => {
+                        masterText += `--- Scene ${s.scene}: ${s.title} ---\nVoiceover: ${s.voiceover}\nImage Prompt: ${s.imagePrompt}\nVideo Prompt: ${s.videoPrompt}\n\n`;
+                    });
+
+                    innerHTML += `
+                        <div class="paper-content">
+                            <p style="color: #A1A1AA; font-size: 13px; margin-bottom: 15px;">Copy this entire block and paste it into ChatGPT or Claude.</p>
+                            <textarea readonly id="master-prompt-text" style="width: 100%; height: 400px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #ccc; padding: 15px; font-family: monospace; font-size: 13px; border-radius: 8px; outline: none; resize: none; line-height: 1.6;">${masterText}</textarea>
+                        </div>
+                    `;
+                } else if (slideData.isScene) {
+                    let toolsHTML = "";
+                    if (slideData.isFirstScene) {
+                        toolsHTML = `<div class="tools-header"><span style="color: #A1A1AA; font-size: 12px; margin-right: 5px;">Recommended Tools:</span>`;
+                        if (slideData.content.tools) {
+                            const toolString = slideData.content.tools.toLowerCase();
+                            if (toolString.includes('midjourney')) toolsHTML += `<a href="https://www.midjourney.com" target="_blank" class="tool-link">${logos.midjourney} Midjourney</a>`;
+                            if (toolString.includes('runway')) toolsHTML += `<a href="https://runwayml.com" target="_blank" class="tool-link">${logos.runway} Runway</a>`;
+                            if (toolString.includes('elevenlabs')) toolsHTML += `<a href="https://elevenlabs.io" target="_blank" class="tool-link">${logos.elevenlabs} ElevenLabs</a>`;
+                        }
+                        toolsHTML += `</div>`;
+                    }
+
+                    innerHTML += `
+                        ${toolsHTML}
+                        <div class="paper-content">
+                            <div class="scene-voiceover" style="display: block; background: #0a0a0a; border-left: 4px solid var(--pink); padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <span style="font-family: var(--font-robotic); font-size: 11px; color: var(--pink); letter-spacing: 1px;">VOICEOVER SCRIPT</span>
+                                    <button class="tts-btn" data-voiceover="${slideData.content.voiceover.replace(/"/g, '&quot;')}">
+                                        <i class="fa-solid fa-volume-high"></i> Play
+                                    </button>
+                                </div>
+                                <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; color: #e0e0e0; line-height: 1.6; font-style: normal;">
+                                    "${slideData.content.voiceover.trim()}"
+                                </div>
+                            </div>
+                            
+                            <div class="prompt-box" style="margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="color: var(--pink);">Image Prompt</strong>
+                                    <button class="mini-copy-btn" onclick="copyText(this, '${slideData.content.imagePrompt.replace(/'/g, "\\'")}')">
+                                        <i class="fa-regular fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <p style="font-size: 13px; color: #A1A1AA; font-family: monospace;">${slideData.content.imagePrompt.trim()}</p>
+                            </div>
+
+                            <div class="prompt-box" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="color: var(--pink);">Video Prompt</strong>
+                                    <button class="mini-copy-btn" onclick="copyText(this, '${slideData.content.videoPrompt.replace(/'/g, "\\'")}')">
+                                        <i class="fa-regular fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                <p style="font-size: 13px; color: #A1A1AA; font-family: monospace;">${slideData.content.videoPrompt.trim()}</p>
+                            </div>
+                            
+                            <button class="copy-btn" style="margin-top: 20px; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: white;" onclick="remixScene(${slideData.content.scene}, event)">
+                                <i class="fa-solid fa-shuffle"></i> Remix This Scene
+                            </button>
+                        </div>
+                    `;
+                } else if (slideData.isTags) {
+                    innerHTML += `
+                        <div class="paper-content">
+                            <div class="tags-display">
+                                ${slideData.content.map(tag => `<span>${tag.trim()}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    let cleanContent = slideData.content ? slideData.content.trim() : "";
+                    
+                    let formattedDesc = cleanContent;
+                    if (index === 2) {
+                        formattedDesc = cleanContent.replace(/•\s*(.*?)(?=\s*•|\s*$)/g, (match, p1) => {
+                            return `<div style="display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start;">
+                                        <i class="fa-solid fa-check-circle" style="color: var(--pink); margin-top: 4px; font-size: 14px;"></i>
+                                        <span>${p1}</span>
+                                    </div>`;
+                        });
+                        formattedDesc = formattedDesc.replace(/•/g, '');
+                    }
+
+                    let finalDescHTML = formattedDesc;
+                    if (blueprint.platform !== 'youtube' && index === 2) {
+                        const appIcon = blueprint.platform === 'instagram' ? 'fa-instagram' : blueprint.platform === 'tiktok' ? 'fa-tiktok' : 'fa-youtube';
+                        const appName = blueprint.platform === 'instagram' ? 'Instagram' : blueprint.platform === 'tiktok' ? 'TikTok' : 'YT Shorts';
+                        
+                        finalDescHTML = `
+                            <div style="background: #000; border: 2px solid #333; border-radius: 24px; padding: 20px; max-width: 350px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                                    <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--pink); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-brands ${appIcon}" style="color: white; font-size: 16px;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 12px; font-weight: 700; color: white;">@your_channel</div>
+                                        <div style="font-size: 10px; color: #777;">${appName}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 14px; line-height: 1.6; color: #efefef;">
+                                    ${formattedDesc}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let altTitlesHTML = "";
+                    if (slideData.altTitles && slideData.altTitles.length > 0) {
+                        altTitlesHTML = `<div style="margin-top: 30px; font-family: var(--font-body); font-size: 15px; color: #A1A1AA; text-align: left; width: 100%;">
+                            <strong style="color: var(--pink); display: block; margin-bottom: 12px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;"><i class="fa-solid fa-lightbulb"></i> Alternative Suggestions:</strong>
+                            <ul style="list-style-type: none; padding-left: 0;">
+                                ${slideData.altTitles.map(t => `<li style="margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 8px; border-left: 2px solid var(--pink); font-size: 14px;">${t}</li>`).join('')}
+                            </ul>
+                        </div>`;
+                    }
+
+                    let copyScriptBtn = index === 2 ? `<button class="copy-btn" onclick="copyFullScript(this)" style="margin-top: 15px;"><i class="fa-solid fa-copy"></i> Copy Full Video Script</button>` : '';
+
+                    innerHTML += `
+                        <div class="paper-content ${slideData.isLarge ? 'large-text' : ''}">
+                            ${index === 2 ? (blueprint.platform === 'youtube' ? `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.8;">${formattedDesc}</div>` : finalDescHTML) : cleanContent}
+                            ${altTitlesHTML}
+                            ${copyScriptBtn}
+                        </div>
+                    `;
+                }
+
+                innerHTML += `</div>`; 
+                slideDiv.innerHTML = innerHTML;
+                track.appendChild(slideDiv);
+
+                setTimeout(() => {
+                    slideDiv.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    slideDiv.style.opacity = '1';
+                    slideDiv.style.transform = 'translateY(0)';
+                }, index * 100);
+
+                const ttsBtn = slideDiv.querySelector('.tts-btn');
+                if (ttsBtn) {
+                    ttsBtn.addEventListener('click', () => speakText(ttsBtn, ttsBtn.dataset.voiceover));
+                }
+
+                if (slideData.isThumbnail) {
+                    loadThumbnailImage(slideData.thumbPrompt, slideData.thumbTitle, index, isShort);
+                }
+            });
+
+            totalSlides = slidesData.length;
+            currentSlide = 0;
+            
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dotsContainer.appendChild(dot);
+            }
+
+            document.getElementById('slideshow-window').style.display = 'block';
+            document.getElementById('slide-controls').style.display = 'flex';
+            document.getElementById('chat-view').classList.add('active');
+            document.getElementById('initial-view').classList.add('hidden');
+            document.getElementById('top-history-btn').style.display = 'none';
+            
+            updateSlideshow();
+        }
+
+        // --- 6. HELPER FUNCTIONS ---
+        function updateSlideshow() {
+            const track = document.getElementById('slideshow-track');
+            if (!isGridMode) track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+            document.querySelectorAll('.dot').forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateSlideshow(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlideshow(); } }
+        
+        function toggleView() {
+            isGridMode = !isGridMode;
+            const windowEl = document.getElementById('slideshow-window');
+            const btn = document.getElementById('view-toggle-btn');
+            if (isGridMode) { windowEl.classList.add('grid-mode'); btn.innerHTML = '<i class="fa-solid fa-images"></i> Slideshow'; }
+            else { windowEl.classList.remove('grid-mode'); btn.innerHTML = '<i class="fa-solid fa-table-cells"></i> Storyboard'; updateSlideshow(); }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('chat-view').classList.contains('active') && document.activeElement.tagName !== 'TEXTAREA') {
+                if (e.key === 'ArrowRight') nextSlide(); else if (e.key === 'ArrowLeft') prevSlide();
+            }
+        });
+
+        function copyText(btn, explicitText) {
+            navigator.clipboard.writeText(explicitText);
+            const originalHTML = btn.innerHTML;
+            const isMini = btn.classList.contains('mini-copy-btn') || btn.classList.contains('mini-btn');
+            btn.innerHTML = isMini ? '<i class="fa-solid fa-check"></i> Copied' : '<i class="fa-solid fa-check"></i> Copied!';
+            btn.style.background = "var(--pink)"; btn.style.color = "white";
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                if (!isMini) { btn.style.background = "rgba(255, 0, 127, 0.1)"; btn.style.color = "var(--pink)"; }
+            }, 2000);
+        }
+
+        function copyForCapCut() {
+            if (!currentBlueprint) return;
+            let capcutText = "";
+            currentBlueprint.scenes.forEach(s => { capcutText += `${s.voiceover.trim()}\n\n`; });
+            navigator.clipboard.writeText(capcutText);
+            alert("Copied! Paste this directly into CapCut's Text-to-Speech.");
+        }
+
+        function speakText(btn, text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+                btn.style.color = "white"; utterance.onend = () => { btn.style.color = "var(--pink)"; };
+            }
+        }
+
+        function speakEntireScript(btn) {
+            if (!currentBlueprint) return;
+            if ('speechSynthesis' in window) {
+                // If it's currently speaking, STOP it.
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel(); // Force stop
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+                    btn.style.color = "var(--pink)";
+                    btn.style.background = "rgba(255, 0, 127, 0.1)";
+                    return;
+                }
+
+                // Otherwise, start speaking
+                window.speechSynthesis.cancel(); // Clear any stuck queues first
+                
+                let fullScript = currentBlueprint.videoTitle + ". \n\n";
+                currentBlueprint.scenes.forEach(s => { fullScript += s.voiceover + " \n"; });
+                
+                const utterance = new SpeechSynthesisUtterance(fullScript);
+                
+                // Change to Stop when it starts
+                utterance.onstart = () => { 
+                    btn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop'; 
+                    btn.style.color = "white"; 
+                    btn.style.background = "var(--pink)"; 
+                };
+                
+                // Reset to Play when it finishes
+                utterance.onend = () => { 
+                    btn.innerHTML = '<i class="fa-solid fa-play"></i> Play'; 
+                    btn.style.color = "var(--pink)"; 
+                    btn.style.background = "rgba(255, 0, 127, 0.1)"; 
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function loadThumbnailImage(prompt, titleText, index, isShort) {
+            const container = document.getElementById(`thumb-preview-${index}`);
+            if(!container) return;
+            container.innerHTML = `<div class="thumb-skeleton"></div>`;
+
+            fetch('/api/generate-image', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt, platform: isShort ? 'instagram' : 'youtube' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                let displayTitle = titleText.toUpperCase();
+                if(displayTitle.length > 25) displayTitle = displayTitle.substring(0, 22) + "...";
+                const img = new Image();
+                const timeout = setTimeout(() => {
+                    container.innerHTML = `<div style="background: linear-gradient(135deg, #1a0a12, #FF007F); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;"><h2 style="color: white; font-size: 24px;">${titleText.substring(0, 30)}...</h2></div>`;
+                }, 4000);
+
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    container.innerHTML = `<img src="${data.imageUrl}" alt="Thumbnail"><div class="thumbnail-text-overlay">${displayTitle}</div><div class="video-preview-overlay"><div class="play-btn-circle"><i class="fa-solid fa-play"></i></div></div>`;
+                };
+                img.onerror = () => {
+                    clearTimeout(timeout);
+                    container.innerHTML = `<div style="background: linear-gradient(135deg, #1a0a12, #FF007F); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;"><h2 style="color: white; font-size: 24px;">${titleText.substring(0, 30)}...</h2></div>`;
+                };
+                img.src = data.imageUrl;
+            });
+        }
+
+        function downloadPackage() {
+            if (!currentBlueprint) return;
+            const zip = new JSZip();
+            const bp = currentBlueprint;
+            
+            let script = `# ${bp.videoTitle}\n\n${bp.videoDescription}\n\n`;
+            let prompts = ""; let srt = ""; let time = 0;
+            const formatSrtTime = (sec) => `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(Math.floor(sec%60)).padStart(2,'0')},000`;
+
+            bp.scenes.forEach((s, i) => {
+                script += `## Scene ${s.scene}: ${s.title}\n\n**Voiceover:** ${s.voiceover}\n\n**Image Prompt:** ${s.imagePrompt}\n\n**Video Prompt:** ${s.videoPrompt}\n\n`;
+                prompts += `SCENE ${s.scene}\nImage: ${s.imagePrompt}\nVideo: ${s.videoPrompt}\n\n`;
+                const start = formatSrtTime(time); time += 5; const end = formatSrtTime(time);
+                srt += `${i + 1}\n${start} --> ${end}\n${s.voiceover}\n\n`;
+            });
+
+            zip.file("script.md", script);
+            zip.file("prompts.txt", prompts);
+            zip.file("tags.txt", bp.tags.join("\n"));
+            zip.file("captions.srt", srt);
+
+            try {
+                const thumbImg = document.querySelector('.thumbnail-preview img');
+                if (thumbImg) {
+                    fetch(thumbImg.src).then(res => res.blob()).then(blob => {
+                        zip.file("thumbnail.jpg", blob);
+                        zip.generateAsync({ type: "blob" }).then(content => {
+                            const url = URL.createObjectURL(content);
+                            const a = document.createElement("a");
+                            a.href = url; a.download = `${bp.videoTitle.replace(/\s+/g, '_')}_Package.zip`; a.click(); URL.revokeObjectURL(url);
+                        });
+                    });
+                } else { throw new Error("No image"); }
+            } catch(e) {
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const url = URL.createObjectURL(content);
+                    const a = document.createElement("a");
+                    a.href = url; a.download = `${bp.videoTitle.replace(/\s+/g, '_')}_Package.zip`; a.click(); URL.revokeObjectURL(url);
+                });
+            }
+        }
+
+        function remixScene(sceneNumber, event) {
+            if (!currentBlueprint) return;
+            const btn = event.target.closest('button'); const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Remixing...';
+            const scene = currentBlueprint.scenes.find(s => s.scene === sceneNumber);
+            if (!scene) return;
+
+            fetch('/api/generate', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: `Rewrite this specific scene to be more exciting. Original: ${scene.voiceover}. Return ONLY a JSON object for a single scene.`, platform: currentBlueprint.platform, language: getSelectedValue('lang-dropdown'), tone: getSelectedValue('tone-dropdown'), duration: 1, sceneLength: 5, totalScenes: 1, aiModel: getSelectedValue('model-dropdown') })
+            })
+            .then(res => res.json())
+            .then(data => {
+                let rawText = data.result.replace(/```json/g, '').replace(/```/g, '');
+                let newSceneData = JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+                const newScene = newSceneData.scenes[0];
+                scene.title = newScene.title || scene.title;
+                scene.voiceover = newScene.voiceover || scene.voiceover;
+                scene.imagePrompt = newScene.imagePrompt || scene.imagePrompt;
+                scene.videoPrompt = newScene.videoPrompt || scene.videoPrompt;
+                saveToHistory(currentBlueprint); renderBlueprint(currentBlueprint);
+                currentSlide = sceneNumber + 5; updateSlideshow();
+            })
+            .catch(() => { alert("AI is busy."); btn.innerHTML = originalText; });
+        }
+
+        function switchPlatform(newPlatform) {
+            if (!currentBlueprint || !activePrompt) return;
+            document.getElementById('platform-dropdown').querySelectorAll('.option').forEach(opt => {
+                if(opt.getAttribute('data-value') === newPlatform) opt.click();
+            });
+            document.getElementById('chat-view').classList.remove('active');
+            document.getElementById('initial-view').classList.remove('hidden');
+            document.getElementById('user-input').value = activePrompt;
+            generate();
+        }
+    </script>
+</body>
+</html>

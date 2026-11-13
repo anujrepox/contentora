@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Hub - Contentora</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+    <meta name="description" content="Everything you need to craft your next viral narrative.">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-main: #050505; --pink: #FF007F; --pink-glow: rgba(255, 0, 127, 0.4);
+            --text-main: #FFFFFF; --text-muted: #A1A1AA; --green: #00FF88; --gold: #FFD700;
+            --font-body: 'Poppins', sans-serif; --font-display: 'Orbitron', sans-serif; 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main); color: var(--text-main); min-height: 100vh;
+            font-family: var(--font-body); display: flex; flex-direction: column;
+            position: relative; overflow-x: hidden;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; 
+            background-image: linear-gradient(to right, rgba(255, 0, 127, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px; mask-image: radial-gradient(circle at center, black 20%, transparent 80%); -webkit-mask-image: radial-gradient(circle at center, black 20%, transparent 80%);
+        }
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.1) 0%, transparent 40%);
+            z-index: -1;
+        }
+        
+        /* NAVBAR */
+        nav {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 50px;
+            width: 100%; z-index: 100; flex-shrink: 0; background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px);
+            position: sticky; top: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .logo-container { display: flex; align-items: center; gap: 15px; text-decoration: none; color: white;}
+        .logo-icon { width: 45px; height: 45px; border: 2px solid var(--pink); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--pink-glow); }
+        .logo-icon i { color: var(--pink); font-size: 20px; }
+        .logo-box { border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 25px; border-radius: 8px; font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+        
+        .nav-links { display: flex; gap: 25px; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+        .nav-link { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: 0.3s; border: 1px solid transparent; }
+        .nav-link:hover, .nav-link.active { color: var(--text-main); background: rgba(255, 0, 127, 0.1); border: 1px solid var(--pink); box-shadow: 0 0 15px rgba(255,0,127,0.2); }
+
+        .btn-login { background: transparent; border: 1px solid var(--pink); color: var(--text-main); padding: 12px 30px; border-radius: 8px; font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 0 15px rgba(255, 0, 127, 0.1); transition: 0.3s; }
+        .btn-login:hover { background: rgba(255, 0, 127, 0.1); box-shadow: 0 0 20px var(--pink-glow); }
+
+        .community-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 100px 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .community-header { text-align: center; margin-bottom: 30px; animation: fadeIn 0.8s ease; }
+        .community-header h1 { font-family: var(--font-display); font-size: 48px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; }
+        .community-header h1 span { color: var(--pink); text-shadow: 0 0 20px var(--pink-glow); }
+        .community-header p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
+
+        /* LIVE STATS TICKER */
+        .stats-ticker { display: flex; gap: 20px; justify-content: center; margin-bottom: 50px; animation: fadeIn 1s ease; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px 30px; border-radius: 50px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .stat-box i { font-size: 24px; color: var(--pink); }
+        .stat-info { text-align: left; }
+        .stat-value { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: white; }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* SECTION TITLES */
+        .section-title { width: 100%; text-align: left; font-family: var(--font-display); font-size: 22px; color: white; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; display: flex; align-items: center; gap: 10px; scroll-margin-top: 100px;}
+        .section-title i { color: var(--pink); }
+
+        /* 1. ASSET VAULT */
+        .asset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%; margin-bottom: 60px; }
+        .asset-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; text-decoration: none; color: white; transition: 0.3s; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .asset-card:hover { background: rgba(255,0,127,0.1); border-color: var(--pink); transform: translateY(-3px); }
+        .asset-icon { font-size: 30px; color: var(--pink); margin-bottom: 10px; }
+        .asset-card h4 { font-size: 14px; margin-bottom: 5px; }
+        .asset-card p { font-size: 11px; color: var(--text-muted); }
+
+        /* 2. ALGORITHM CHEAT SHEET & CALCULATOR GRID */
+        .middle-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; width: 100%; margin-bottom: 60px; }
+        
+        .algo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+        .algo-card { background: linear-gradient(145deg, rgba(20, 10, 15, 0.8), rgba(10, 5, 10, 0.9)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+        .algo-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--pink); }
+        .algo-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+        .algo-list { list-style: none; font-size: 12px; color: #ccc; }
+        .algo-list li { margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .algo-list li strong { color: white; }
+
+        /* CALCULATOR WIDGET */
+        .calculator-card { background: linear-gradient(145deg, rgba(0,255,136,0.05), rgba(10,5,10,0.9)); border: 1px solid rgba(0,255,136,0.3); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
+        .calc-header { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--green); margin-bottom: 20px; }
+        .calc-input-group { margin-bottom: 15px; }
+        .calc-input-group label { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .calc-input-group input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; color: white; font-family: var(--font-body); font-size: 14px; outline: none; }
+        .calc-input-group input:focus { border-color: var(--green); }
+        
+        /* REMOVED NUMBER INPUT ARROWS */
+        .calc-input-group input[type=number]::-webkit-inner-spin-button, 
+        .calc-input-group input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        .calc-input-group input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .calc-result { margin-top: 15px; text-align: center; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; border: 1px dashed rgba(0,255,136,0.5); }
+        .calc-result span { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .calc-result strong { font-family: var(--font-display); font-size: 28px; color: var(--green); }
+
+        /* 3. CREATOR TOOLBOX */
+        .toolbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; margin-bottom: 60px; }
+        .toolbox-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 25px; transition: 0.3s; text-decoration: none; display: flex; flex-direction: column; align-items: flex-start; }
+        .toolbox-card:hover { transform: translateY(-5px); border-color: var(--pink); box-shadow: 0 10px 30px rgba(255, 0, 127, 0.15); }
+        .toolbox-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 15px; color: white; }
+        .toolbox-card h3 { color: white; font-size: 18px; font-family: var(--font-display); margin-bottom: 8px; }
+        .toolbox-card p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 15px; flex: 1; }
+        .toolbox-btn { color: var(--pink); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+
+        /* 4. HOOK GENERATOR WIDGET */
+        .hook-widget-container { width: 100%; margin-bottom: 60px; }
+        .hook-widget { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; background: linear-gradient(145deg, rgba(20,10,15,0.8), rgba(5,5,5,0.9)); border: 1px solid rgba(255,0,127,0.3); border-radius: 20px; padding: 40px; box-shadow: 0 0 40px rgba(255,0,127,0.1); position: relative; overflow: hidden; }
+        .hook-terminal-box { display: flex; flex-direction: column; justify-content: center; background: #000; border: 1px solid #333; border-radius: 12px; padding: 30px; min-height: 200px; position: relative; }
+        .hook-terminal-box::before { content: '● ● ●'; position: absolute; top: 10px; left: 15px; color: #555; font-size: 10px; letter-spacing: 2px; }
+        .hook-text { font-family: monospace; font-size: 16px; color: var(--green); line-height: 1.6; text-align: left; }
+        .hook-text::after { content: '▋'; animation: blink 1s step-end infinite; color: var(--pink); }
+        .hook-actions { display: flex; flex-direction: column; justify-content: center; gap: 15px; }
+        .hook-actions h3 { font-family: var(--font-display); font-size: 24px; color: white; margin-bottom: 10px; }
+        .hook-actions p { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; }
+        .btn-roll { background: rgba(255,0,127,0.1); border: 1px solid var(--pink); color: var(--pink); padding: 15px; border-radius: 12px; font-weight: 700; font-family: var(--font-display); font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; }
+        .btn-roll:hover { background: var(--pink); color: white; box-shadow: 0 0 20px var(--pink-glow); transform: scale(1.02); }
+        .btn-use-hook { display: none; background: var(--green); border: none; color: black; padding: 15px; border-radius: 12px; font-weight: 700; font-family: var(--font-display); font-size: 16px; cursor: pointer; transition: 0.3s; width: 100%; text-align: center; }
+        .btn-use-hook:hover { box-shadow: 0 0 20px rgba(0,255,136,0.4); transform: scale(1.02); }
+
+        /* 5. VIRAL TEMPLATES */
+        .prompt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; margin-bottom: 60px; }
+        .prompt-card { background: linear-gradient(145deg, rgba(20, 10, 15, 0.6), rgba(10, 5, 10, 0.8)); border: 1px solid rgba(255, 0, 127, 0.2); border-radius: 16px; padding: 25px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; position: relative; }
+        .prompt-card:hover { transform: translateY(-5px); border-color: var(--pink); box-shadow: 0 10px 30px rgba(255, 0, 127, 0.15); }
+        .badge-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .badge-pov { background: rgba(255, 0, 127, 0.2); color: var(--pink); border: 1px solid var(--pink); }
+        .badge-story { background: rgba(0, 255, 136, 0.1); color: var(--green); border: 1px solid var(--green); }
+        .badge-fact { background: rgba(255, 215, 0, 0.1); color: gold; border: 1px solid gold; }
+        .prompt-card h3 { font-size: 18px; color: white; margin-bottom: 10px; font-family: var(--font-display);}
+        .prompt-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; font-family: monospace;}
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 15px; }
+        .creator-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--pink); }
+        .btn-use { background: transparent; border: 1px solid var(--pink); color: var(--pink); padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 600; text-decoration: none; transition: 0.3s; cursor: pointer; }
+        .btn-use:hover { background: var(--pink); color: white; box-shadow: 0 0 15px var(--pink-glow); }
+
+        /* JOIN SECTION */
+        .join-section { text-align: center; background: linear-gradient(145deg, rgba(30, 10, 20, 0.8), rgba(10, 5, 10, 0.9)); border: 1px solid rgba(255, 0, 127, 0.3); border-radius: 24px; padding: 60px 40px; width: 100%; box-shadow: 0 0 50px rgba(255, 0, 127, 0.15); position: relative; overflow: hidden; margin-top: 40px; }
+        .join-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(to right, rgba(255, 0, 127, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 0, 127, 0.05) 1px, transparent 1px); background-size: 30px 30px; z-index: 0; }
+        .join-content { position: relative; z-index: 1; }
+        .join-section h2 { font-family: var(--font-display); font-size: 32px; margin-bottom: 15px; }
+        .join-section p { color: var(--text-muted); margin-bottom: 35px; font-size: 16px; }
+        .social-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn-social { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; border-radius: 50px; font-size: 15px; font-weight: 600; text-decoration: none; transition: 0.3s; }
+        .btn-discord { background: #5865F2; color: white; box-shadow: 0 0 20px rgba(88, 101, 242, 0.3); }
+        .btn-discord:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(88, 101, 242, 0.5); }
+        .btn-twitter { background: #1DA1F2; color: white; box-shadow: 0 0 20px rgba(29, 161, 242, 0.3); }
+        .btn-twitter:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(29, 161, 242, 0.5); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 50% { opacity: 0; } }
+        
+        @media (max-width: 1200px) { .nav-links { position: relative; left: 0; transform: none; gap: 15px; } }
+        @media (max-width: 900px) { 
+            .nav-links { display: none; } 
+            .community-header h1 { font-size: 32px; }
+            .hook-widget, .middle-grid, .algo-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- NAVBAR WITH INTEGRATED LINKS -->
+    <nav>
+        <a href="index.html" class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-crown"></i></div>
+            <div class="logo-box">Contentora</div>
+        </a>
+
+        <div class="nav-links">
+            <a href="#vault" class="nav-link active">Free Assets</a>
+            <a href="#algo" class="nav-link">Algorithm</a>
+            <a href="#tools" class="nav-link">AI Toolbox</a>
+            <a href="#inspiration" class="nav-link">Inspiration</a>
+            <a href="#templates" class="nav-link">Templates</a>
+        </div>
+
+        <button class="btn-login" onclick="window.location.href='login.html'">
+            Log In
+        </button>
+    </nav>
+
+    <div class="community-wrapper">
+        
+        <div class="community-header">
+            <h1>The Creator <span>Ecosystem.</span></h1>
+            <p>Everything you need to script, generate, edit, and post your next viral narrative.</p>
+        </div>
+
+        <!-- LIVE STATS TICKER -->
+        <div class="stats-ticker">
+            <div class="stat-box">
+                <i class="fa-solid fa-file-signature"></i>
+                <div class="stat-info">
+                    <div class="stat-value">14,203</div>
+                    <div class="stat-label">Scripts Generated</div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-users"></i>
+                <div class="stat-info">
+                    <div class="stat-value">4,891</div>
+                    <div class="stat-label">Active Creators</div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i class="fa-solid fa-video"></i>
+                <div class="stat-info">
+                    <div class="stat-value">8,340</div>
+                    <div class="stat-label">Videos Produced</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. FREE ASSET VAULT -->
+        <h2 class="section-title" id="vault"><i class="fa-solid fa-vault"></i> The Asset Vault (Copyright Free)</h2>
+        <div class="asset-grid">
+            <a href="https://mixkit.co/free-stock-video/" target="_blank" class="asset-card">
+                <i class="fa-solid fa-video asset-icon"></i>
+                <h4>Stock Video</h4>
+                <p>Free cinematic B-Roll</p>
+            </a>
+            <a href="https://pixabay.com/music/" target="_blank" class="asset-card">
+                <i class="fa-solid fa-music asset-icon"></i>
+                <h4>Background Music</h4>
+                <p>Free tracks for YouTube</p>
+            </a>
+            <a href="https://freesound.org/" target="_blank" class="asset-card">
+                <i class="fa-solid fa-volume-high asset-icon"></i>
+                <h4>Sound Effects</h4>
+                <p>Whooshes, hits, and transitions</p>
+            </a>
+            <a href="https://www.pexels.com/" target="_blank" class="asset-card">
+                <i class="fa-solid fa-image asset-icon"></i>
+                <h4>Stock Images</h4>
+                <p>High-quality photos</p>
+            </a>
+            <a href="https://fonts.google.com/" target="_blank" class="asset-card">
+                <i class="fa-solid fa-font asset-icon"></i>
+                <h4>Free Fonts</h4>
+                <p>For thumbnails & captions</p>
+            </a>
+        </div>
+
+        <!-- 2. MIDDLE GRID (ALGO & CALCULATOR) -->
+        <div class="middle-grid" id="algo">
+            <!-- Left: Algorithm -->
+            <div>
+                <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Algorithm Cheat Sheet</h2>
+                <div class="algo-grid">
+                    <div class="algo-card">
+                        <div class="algo-header"><i class="fa-brands fa-youtube" style="color:#FF0000;"></i> YT Long</div>
+                        <ul class="algo-list">
+                            <li><span>Length:</span> <strong>8-15 mins</strong></li>
+                            <li><span>Tags:</span> <strong>Max 30</strong></li>
+                            <li><span>Ratio:</span> <strong>16:9</strong></li>
+                        </ul>
+                    </div>
+                    <div class="algo-card">
+                        <div class="algo-header"><i class="fa-brands fa-youtube" style="color:#FF0000;"></i> YT Shorts</div>
+                        <ul class="algo-list">
+                            <li><span>Length:</span> <strong>30-60s</strong></li>
+                            <li><span>Tags:</span> <strong>3-5 max</strong></li>
+                            <li><span>Ratio:</span> <strong>9:16</strong></li>
+                        </ul>
+                    </div>
+                    <div class="algo-card">
+                        <div class="algo-header"><i class="fa-brands fa-instagram" style="color:#E1306C;"></i> IG Reels</div>
+                        <ul class="algo-list">
+                            <li><span>Length:</span> <strong>15-30s</strong></li>
+                            <li><span>Tags:</span> <strong>8-12 niche</strong></li>
+                            <li><span>Ratio:</span> <strong>9:16</strong></li>
+                        </ul>
+                    </div>
+                    <div class="algo-card">
+                        <div class="algo-header"><i class="fa-brands fa-tiktok"></i> TikTok</div>
+                        <ul class="algo-list">
+                            <li><span>Length:</span> <strong>10-25s</strong></li>
+                            <li><span>Tags:</span> <strong>3 viral</strong></li>
+                            <li><span>Ratio:</span> <strong>9:16</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Calculator Widget -->
+            <div>
+                <h2 class="section-title"><i class="fa-solid fa-calculator"></i> Revenue Estimator</h2>
+                <div class="calculator-card">
+                    <div class="calc-header"><i class="fa-solid fa-sack-dollar"></i> YouTube Earnings</div>
+                    
+                    <div class="calc-input-group">
+                        <label>Estimated Views</label>
+                        <input type="number" id="calc-views" placeholder="e.g. 50000" value="50000" oninput="calculateRevenue()">
+                    </div>
+                    <div class="calc-input-group">
+                        <label>Niche CPM ($)</label>
+                        <input type="number" id="calc-cpm" placeholder="e.g. 4.50" value="4.50" step="0.1" oninput="calculateRevenue()">
+                    </div>
+                    
+                    <div class="calc-result">
+                        <span>Estimated Payout</span>
+                        <strong id="calc-output">$225.00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CREATOR TOOLBOX -->
+        <h2 class="section-title" id="tools"><i class="fa-solid fa-toolbox"></i> The AI Toolbox</h2>
+        <div class="toolbox-grid">
+            <a href="https://elevenlabs.io" target="_blank" class="toolbox-card">
+                <div class="toolbox-icon" style="color: #fff; background: #000; border: 1px solid #333;"><i class="fa-solid fa-microphone"></i></div>
+                <h3>ElevenLabs</h3>
+                <p>Paste your generated script here for ultra-realistic AI voiceovers.</p>
+                <div class="toolbox-btn">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </a>
+            <a href="https://www.midjourney.com" target="_blank" class="toolbox-card">
+                <div class="toolbox-icon" style="color: #fff;"><i class="fa-solid fa-sailboat"></i></div>
+                <h3>Midjourney</h3>
+                <p>Generate stunning, cinematic visuals for your scenes using our prompts.</p>
+                <div class="toolbox-btn">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </a>
+            <a href="https://runwayml.com" target="_blank" class="toolbox-card">
+                <div class="toolbox-icon" style="color: #fff;"><i class="fa-solid fa-film"></i></div>
+                <h3>Runway</h3>
+                <p>Bring your static images to life with AI motion and camera pans.</p>
+                <div class="toolbox-btn">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </a>
+            <a href="https://www.capcut.com" target="_blank" class="toolbox-card">
+                <div class="toolbox-icon" style="color: #fff;"><i class="fa-solid fa-scissors"></i></div>
+                <h3>CapCut</h3>
+                <p>Paste your SRT captions and voiceovers directly into CapCut.</p>
+                <div class="toolbox-btn">Launch Tool <i class="fa-solid fa-arrow-right"></i></div>
+            </a>
+        </div>
+
+        <!-- 4. HOOK GENERATOR WIDGET -->
+        <h2 class="section-title" id="inspiration"><i class="fa-solid fa-dice"></i> Instant Inspiration</h2>
+        <div class="hook-widget-container">
+            <div class="hook-widget">
+                
+                <!-- Terminal Box -->
+                <div class="hook-terminal-box">
+                    <div class="hook-text" id="hook-display">
+                        > Click "Roll Hook" to generate a proven viral prompt...
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="hook-actions">
+                    <h3>Stuck? Let AI decide.</h3>
+                    <p>We analyzed thousands of viral videos across YouTube, TikTok, and Reels. Hit the button below to roll a proven hook and instantly generate your video.</p>
+                    
+                    <button class="btn-roll" onclick="rollHook()">
+                        <i class="fa-solid fa-shuffle"></i> ROLL A VIRAL HOOK
+                    </button>
+                    
+                    <button class="btn-use-hook" id="use-hook-btn" onclick="useRolledHook()">
+                        <i class="fa-solid fa-bolt"></i> GENERATE THIS VIDEO
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. VIRAL TEMPLATES -->
+        <h2 class="section-title" id="templates"><i class="fa-solid fa-fire"></i> Trending Prompt Templates</h2>
+        <div class="prompt-grid">
+            <div class="prompt-card">
+                <div>
+                    <div class="badge-tag badge-pov">POV / TikTok</div>
+                    <h3>The POV Hook</h3>
+                    <p>"POV: You just discovered a secret underwater city that shouldn't exist..."</p>
+                </div>
+                <div class="card-footer">
+                    <div class="creator-badge"><i class="fa-solid fa-bolt"></i> High Retention</div>
+                    <a href="idea.html?prompt=POV:%20You%20just%20discovered%20a%20secret%20underwater%20city%20that%20shouldn't%20exist" class="btn-use">Use Prompt</a>
+                </div>
+            </div>
+            <div class="prompt-card">
+                <div>
+                    <div class="badge-tag badge-story">Storytime</div>
+                    <h3>The Kolkata Chronicles</h3>
+                    <p>"A cinematic story about the last tram ride in Kolkata at midnight, blending nostalgia..."</p>
+                </div>
+                <div class="card-footer">
+                    <div class="creator-badge"><i class="fa-solid fa-location-dot"></i> Local Story</div>
+                    <a href="idea.html?prompt=A%20cinematic%20story%20about%20the%20last%20tram%20ride%20in%20Kolkata%20at%20midnight,%20blending%20nostalgia%20with%20cyberpunk%20aesthetics" class="btn-use">Use Prompt</a>
+                </div>
+            </div>
+            <div class="prompt-card">
+                <div>
+                    <div class="badge-tag badge-fact">Educational</div>
+                    <h3>Mind-Blowing Facts</h3>
+                    <p>"3 psychological tricks restaurants use to make you spend more money..."</p>
+                </div>
+                <div class="card-footer">
+                    <div class="creator-badge"><i class="fa-solid fa-brain"></i> Informative</div>
+                    <a href="idea.html?prompt=3%20psychological%20tricks%20restaurants%20use%20to%20make%20you%20spend%20more%20money" class="btn-use">Use Prompt</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- JOIN CTA -->
+        <div class="join-section">
+            <div class="join-content">
+                <h2>Ready to go viral?</h2>
+                <p>Join thousands of creators using Contentora to automate their production pipeline.</p>
+                <div class="social-buttons">
+                    <a href="#" class="btn-social btn-discord"><i class="fa-brands fa-discord"></i> Join Discord</a>
+                    <a href="#" class="btn-social btn-twitter"><i class="fa-brands fa-twitter"></i> Follow on X</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- REVENUE CALCULATOR LOGIC ---
+        function calculateRevenue() {
+            const views = parseFloat(document.getElementById('calc-views').value) || 0;
+            const cpm = parseFloat(document.getElementById('calc-cpm').value) || 0;
+            
+            // Formula: (Views / 1000) * CPM
+            const revenue = (views / 1000) * cpm;
+            
+            // Format as currency
+            document.getElementById('calc-output').innerText = `$${revenue.toFixed(2)}`;
+        }
+
+        // --- HOOK ROLLER LOGIC ---
+        const viralHooks = [
+            "POV: You just discovered a secret underwater city that shouldn't exist...",
+            "I tried this viral hack so you don't have to...",
+            "3 psychological tricks restaurants use to make you spend more money...",
+            "The time I accidentally stole a police car in Tokyo...",
+            "Wait for it... this AI generated video is insane.",
+            "Stop scrolling. You need to see this.",
+            "What happens when a dog tries to rob a bank?",
+            "The dark truth behind your favorite childhood movie...",
+            "Why 99% of people fail at this...",
+            "I spent 100 hours learning this so you don't have to..."
+        ];
+
+        let currentHook = "";
+
+        function rollHook() {
+            const textEl = document.getElementById('hook-display');
+            const btn = document.getElementById('use-hook-btn');
+            
+            // Reset styles
+            textEl.style.color = "var(--pink)";
+            textEl.innerText = "> Scanning viral database...";
+            btn.style.display = "none";
+            
+            // Simulate scan
+            setTimeout(() => {
+                currentHook = viralHooks[Math.floor(Math.random() * viralHooks.length)];
+                
+                // Typewriter effect
+                let i = 0;
+                textEl.innerText = "> ";
+                const typing = setInterval(() => {
+                    textEl.innerText += currentHook.charAt(i);
+                    i++;
+                    if (i >= currentHook.length) {
+                        clearInterval(typing);
+                        textEl.style.color = "var(--green)";
+                        btn.style.display = "block";
+                    }
+                }, 20);
+                
+            }, 500);
+        }
+
+        function useRolledHook() {
+            if(currentHook) {
+                window.location.href = `idea.html?prompt=${encodeURIComponent(currentHook)}`;
+            }
+        }
+
+        // --- NAVBAR SMOOTH SCROLLING ---
+        document.querySelectorAll('.nav-links a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+</html>
