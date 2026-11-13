@@ -1,0 +1,47 @@
+\================================================================================
+🎯 CONTENTORA - MASTER BUTTON & NAVIGATION MAP
+================================================================================
+
+📄 1. HOME PAGE (index.html)
+│
+├── 🟢 Navigation Bar (Top)
+│   ├── Logo (Contentora)
+│   ├── Tab: Home
+│   ├── Tab: Tools (Dropdown)
+│   ├── Tab: Features (Dropdown)
+│   ├── Tab: Pricing
+│   ├── Tab: About
+│   ├── Tab: Community
+│   └── Button: [Log In]
+│
+└── 🟢 Hero Section (Center)
+    ├── Button: [Unleash Your Idea] (Primary)
+    └── Button: [Watch Demo] (Secondary)
+
+
+📄 2. AUTHENTICATION (login.html)
+│
+├── 🟢 Login Form
+│   ├── Button: [Log In]
+│   └── Text Link: "Don't have an account? Sign Up"
+│
+└── 🟢 Signup Form
+    └── Button: [Create Account]
+
+
+📄 3. AI STUDIO / DASHBOARD (idea.html)
+│
+├── 🟢 Input Area (Initial View)
+│   ├── Dropdown: Language (English, Hindi, Hinglish)
+│   ├── Dropdown: Duration (1 Min, 2 Min, 5 Min, Custom)
+│   ├── Dropdown: Scene Length (5s, 10s, 20s, 30s)
+│   ├── Dropdown: AI Model (Free Engine, Groq, Google Gemini, OpenRouter)
+│   └── Button: [➔] (Submit Arrow)
+│
+└── 🟢 Slideshow Area (Result View)
+    ├── Button: [Prev] (Previous Slide)
+    ├── Button: [Next] (Next Slide)
+    └── Slide Actions
+        ├── Button: [Copy Thumbnail Prompt]
+        ├── Button: [Copy Image Prompt]
+        └── Button: [Copy Video Prompt]
