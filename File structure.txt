@@ -1,0 +1,33 @@
+📁 Contentora/
+│
+├── 📁 Frontend/
+│   │
+│   ├── 🌐 index.html
+│   │   └── The Landing Page. Contains the hero section, the anime character, and the main "Unleash Your Idea" call-to-action that redirects users to the AI Studio.
+│   │
+│   ├── 🌐 idea.html
+│   │   └── The AI Creative Studio (The Core App). Contains the input box, custom dropdowns (Language, Duration, AI Model), and the dynamic slideshow that displays the generated Title, Thumbnail, Description, and Scenes.
+│   │
+│   ├── 🌐 login.html
+│   │   └── A sleek, glassmorphism login page to authenticate users.
+│   │
+│   ├── 🌐 about.html
+│   │   └── The company story, mission, and the "Meet the Team" section.
+│   │
+│   ├── 🌐 community.html
+│   │   └── A gallery showcasing trending prompts and creations.
+│   │
+│   ├── 🖼️ anime-boy-full.png
+│   │   └── The main visual asset (anime character) used across the site.
+│   │
+│   ├── ⚙️ server.js
+│   │   └── The Backend Engine. Acts as a secure middleman between the frontend and AI APIs (Groq, Google, OpenRouter). Returns formatted JSON.
+│   │
+│   ├── 📦 package.json
+│   │   └── Node.js configuration file listing dependencies (express, cors, dotenv).
+│   │
+│   └── 🔒 .env 
+│       └── Secure Vault storing secret API keys.
+│
+└── 📁 node_modules/
+    └── Auto-generated libraries folder. Never upload this to GitHub.
